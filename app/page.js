@@ -58,7 +58,7 @@ export default function Home() {
         setSelectedHistory([]); // reset selection on refresh
       } else if (res.status === 401) {
         handleLogout();
-        setError("Session expired or invalid token.");
+        setError("Сессия истекла или неверный токен.");
       }
     } catch (err) {
       console.error("Failed to fetch history:", err);
@@ -90,10 +90,10 @@ export default function Home() {
         fetchHistory(); // refresh history
       } else {
         if (res.status === 401) handleLogout();
-        setError(data.error || "An error occurred");
+        setError(data.error || "Произошла ошибка");
       }
     } catch (err) {
-      setError("Network error. Please try again.");
+      setError("Ошибка сети. Пожалуйста, попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,7 @@ export default function Home() {
 
   const handleDeleteSelected = async () => {
     if (selectedHistory.length === 0) return;
-    if (!confirm(`Are you sure you want to delete ${selectedHistory.length} selected emails?`)) return;
+    if (!confirm(`Вы уверены, что хотите удалить ${selectedHistory.length} выбранных почт?`)) return;
     
     // Process sequentially to keep it simple, or use Promise.all
     try {
@@ -148,7 +148,7 @@ export default function Home() {
   };
 
   const handleClearAll = async () => {
-    if (!confirm("Are you sure you want to delete ALL email history?")) return;
+    if (!confirm("Вы уверены, что хотите удалить ВСЮ историю почт?")) return;
     try {
       const res = await fetch(`/api/history?id=all`, { 
         method: "DELETE",
@@ -199,19 +199,19 @@ export default function Home() {
     return (
       <main className="container login-container">
         <h1>ZenMailFlow</h1>
-        <p className="subtitle">Secure Access Required</p>
+        <p className="subtitle">Требуется авторизация</p>
         <div className="glass-panel">
           <form onSubmit={handleLogin} className="form-group">
-            <label htmlFor="token">Master Token</label>
+            <label htmlFor="token">Мастер-токен</label>
             <input
               type="password"
               id="token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="Enter your access token"
+              placeholder="Введите ваш токен доступа"
               required
             />
-            <button type="submit" className="btn" style={{ marginTop: '1rem' }}>Login</button>
+            <button type="submit" className="btn" style={{ marginTop: '1rem' }}>Войти</button>
           </form>
           {error && <p style={{ color: 'var(--danger-color)', marginTop: '1rem', fontSize: '0.9rem', textAlign: 'center' }}>{error}</p>}
         </div>
@@ -223,7 +223,7 @@ export default function Home() {
     <main className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1>ZenMailFlow</h1>
-        <button onClick={handleLogout} className="btn btn-secondary btn-sm">Logout</button>
+        <button onClick={handleLogout} className="btn btn-secondary btn-sm">Выйти</button>
       </div>
       
       <div className="tabs">
@@ -231,13 +231,13 @@ export default function Home() {
           className={`tab ${activeTab === 'generator' ? 'active' : ''}`}
           onClick={() => setActiveTab('generator')}
         >
-          Generator
+          Генерация
         </button>
         <button 
           className={`tab ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
         >
-          History ({history.length})
+          История ({history.length})
         </button>
       </div>
 
@@ -246,7 +246,7 @@ export default function Home() {
           <div className="glass-panel" style={{ padding: '1rem 1.5rem' }}>
             <form onSubmit={handleGenerate} className="flex-row">
               <div className="form-group" style={{ margin: 0, flex: 1 }}>
-                <label htmlFor="count">Number of emails to generate (1-100)</label>
+                <label htmlFor="count">Количество почт для генерации (1-100)</label>
                 <input
                   type="number"
                   id="count"
@@ -261,10 +261,10 @@ export default function Home() {
                 {loading ? (
                   <>
                     <span className="loader"></span>
-                    Generating
+                    Генерация...
                   </>
                 ) : (
-                  "Generate"
+                  "Сгенерировать"
                 )}
               </button>
             </form>
@@ -274,20 +274,20 @@ export default function Home() {
           {freshEmails.length > 0 && (
             <div className="glass-panel">
               <div className="section-header">
-                <h3>Freshly Generated ({freshEmails.length})</h3>
+                <h3>Сгенерированные почты ({freshEmails.length})</h3>
                 <div className="flex-row">
                   <button 
                     className="btn btn-secondary btn-sm" 
                     onClick={() => handleDownloadTxt(freshEmails.filter((_, idx) => selectedFresh.includes(idx)))}
                     disabled={selectedFresh.length === 0}
                   >
-                    Download Selected
+                    Скачать выбранные
                   </button>
                   <button 
                     className="btn btn-secondary btn-sm" 
                     onClick={() => handleDownloadTxt(freshEmails)}
                   >
-                    Download All
+                    Скачать все
                   </button>
                 </div>
               </div>
@@ -303,8 +303,8 @@ export default function Home() {
                           onChange={toggleSelectAllFresh}
                         />
                       </th>
-                      <th>Email Address</th>
-                      <th>Password</th>
+                      <th>Адрес почты</th>
+                      <th>Пароль</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -332,39 +332,39 @@ export default function Home() {
       {activeTab === 'history' && (
         <div className="glass-panel">
           <div className="section-header">
-            <h3>Stored Emails</h3>
+            <h3>Сохраненные почты</h3>
             <div className="flex-row">
               <button 
                 className="btn btn-secondary btn-sm" 
                 onClick={() => handleDownloadTxt(history.filter(h => selectedHistory.includes(h.id)))}
                 disabled={selectedHistory.length === 0}
               >
-                Download Selected
+                Скачать выбранные
               </button>
               <button 
                 className="btn btn-secondary btn-sm" 
                 onClick={() => handleDownloadTxt(history)}
                 disabled={history.length === 0}
               >
-                Download All
+                Скачать все
               </button>
               <button 
                 className="btn btn-danger btn-sm" 
                 onClick={handleDeleteSelected}
                 disabled={selectedHistory.length === 0}
               >
-                Delete Selected
+                Удалить выбранные
               </button>
               {history.length > 0 && (
                 <button className="btn btn-danger btn-sm" onClick={handleClearAll}>
-                  Delete All
+                  Удалить все
                 </button>
               )}
             </div>
           </div>
           
           {history.length === 0 ? (
-            <div className="empty-state">No emails generated yet.</div>
+            <div className="empty-state">Почты еще не сгенерированы.</div>
           ) : (
             <div className="table-container">
               <table className="data-table">
@@ -377,9 +377,9 @@ export default function Home() {
                         onChange={toggleSelectAllHistory}
                       />
                     </th>
-                    <th>Email Address</th>
-                    <th>Password</th>
-                    <th className="actions-cell">Actions</th>
+                    <th>Адрес почты</th>
+                    <th>Пароль</th>
+                    <th className="actions-cell">Действия</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -398,7 +398,7 @@ export default function Home() {
                         <button 
                           className="btn btn-danger btn-sm" 
                           onClick={() => handleDelete(item.id)}
-                          title="Delete"
+                          title="Удалить"
                         >
                           ×
                         </button>
