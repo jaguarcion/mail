@@ -108,12 +108,6 @@ export default function ClientAdobePage({ params }) {
 
     return (
         <div className={`min-h-screen font-sans p-4 sm:p-8 flex justify-center items-start selection:bg-blue-500/30 transition-colors duration-300 bg-slate-50 text-slate-900`}>
-            <Head>
-                <title>Ваш аккаунт Adobe</title>
-            </Head>
-
-            
-
             <div className="w-full max-w-2xl space-y-6 mt-4 sm:mt-10 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
                 
                 {/* Header */}
