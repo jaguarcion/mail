@@ -6,9 +6,54 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Copy, Link as LinkIcon, Pencil } from "lucide-react";
+import { UserPlus, Copy, Link as LinkIcon, Pencil, Check, ChevronsUpDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+
+function AssignAccountCombobox({ availableAccounts, onAssign }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-[200px] justify-between h-8 text-xs px-2"
+                >
+                    <span className="truncate">Привязать аккаунт</span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+                <Command>
+                    <CommandInput placeholder="Поиск по email..." className="h-9 text-xs" />
+                    <CommandList>
+                        <CommandEmpty className="py-2 text-center text-xs text-muted-foreground">Не найдено свободных аккаунтов</CommandEmpty>
+                        <CommandGroup>
+                            {availableAccounts.map((acc) => (
+                                <CommandItem
+                                    key={acc.id}
+                                    value={acc.email}
+                                    onSelect={() => {
+                                        onAssign(acc.id);
+                                        setOpen(false);
+                                    }}
+                                    className="text-xs"
+                                >
+                                    <span className="truncate">{acc.email}</span>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}
 
 export default function ClientsTab({ token, clients, onFetchClients }) {
     const [form, setForm] = useState({ email: '', telegram: '', subscription_ends_at: '' });
@@ -214,20 +259,10 @@ export default function ClientsTab({ token, clients, onFetchClients }) {
                                                     </Badge>
                                                 </div>
                                             ) : (
-                                                <Select onValueChange={(val) => handleAssignAdobe(c.id, parseInt(val))}>
-                                                    <SelectTrigger className="w-full max-w-[200px] h-8 text-xs">
-                                                        <SelectValue placeholder="Привязать аккаунт" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {availableAccounts.length === 0 ? (
-                                                            <SelectItem value="none" disabled>Нет свободных аккаунтов</SelectItem>
-                                                        ) : (
-                                                            availableAccounts.map(acc => (
-                                                                <SelectItem key={acc.id} value={acc.id.toString()}>{acc.email}</SelectItem>
-                                                            ))
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
+                                                <AssignAccountCombobox 
+                                                    availableAccounts={availableAccounts} 
+                                                    onAssign={(accId) => handleAssignAdobe(c.id, accId)} 
+                                                />
                                             )}
                                         </TableCell>
                                     </TableRow>

@@ -202,38 +202,8 @@ bot.on('message', async (msg) => {
     }
 
     if (text === '💬 Поддержка') {
-        supportModes.add(chatId);
-        return bot.sendMessage(chatId, '💬 Вы в режиме общения с поддержкой. Напишите ваш вопрос ниже:', {
-            reply_markup: {
-                keyboard: [[{ text: '❌ Выйти из поддержки' }]],
-                resize_keyboard: true
-            }
-        });
+        return bot.sendMessage(chatId, 'Для поддержки напишите нам - @help_keysoft');
     }
 
-    if (text === '❌ Выйти из поддержки') {
-        supportModes.delete(chatId);
-        return bot.sendMessage(chatId, 'Вы вышли из режима поддержки.', KEYBOARD_MENU);
-    }
-
-    // Normal message handling (Support)
-    if (supportModes.has(chatId) && text) {
-        try {
-            db.prepare('INSERT INTO support_messages (client_id, sender, message) VALUES (?, ?, ?)')
-              .run(client.id, 'client', text);
-            bot.sendMessage(chatId, '✅ Сообщение доставлено.');
-
-            // Notify admins
-            const clientName = client.telegram_first_name || client.telegram_username || client.email || `Клиент #${client.id}`;
-            for (const adminId of ADMIN_IDS) {
-                bot.sendMessage(adminId, `📨 **Новое сообщение от ${clientName}** (ID: ${client.id})\n\n${text}`, { parse_mode: 'Markdown' }).catch(() => {});
-            }
-
-        } catch (e) {
-            console.error(e);
-            bot.sendMessage(chatId, '⚠️ Не удалось отправить сообщение.');
-        }
-    } else {
-        bot.sendMessage(chatId, 'Пожалуйста, используйте меню.', KEYBOARD_MENU);
-    }
+    bot.sendMessage(chatId, 'Пожалуйста, используйте меню.', KEYBOARD_MENU);
 });
