@@ -54,8 +54,9 @@ export async function PATCH(request) {
     }
 
     if (action === 'assign') {
-      updateAdobeAccountClient(id, client_id);
-      if (client_id) {
+      updateAdobeAccountClient(id, client_id === -1 ? -1 : (client_id || null));
+      // Optionally update client if a real client is assigned, but we are moving away from this.
+      if (client_id && client_id !== -1) {
         updateClientAdobeAccount(client_id, id);
       }
       return NextResponse.json({ success: true });
