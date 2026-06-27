@@ -112,7 +112,7 @@ export default function SupportTab({ token }) {
                                 <div className="flex justify-between items-center mb-1">
                                     <span className="font-semibold text-sm truncate">{getClientName(t)}</span>
                                     {t.unread_count > 0 && (
-                                        <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">{t.unread_count}</Badge>
+                                        <Badge variant="destructive" className="h-5 px-1.5 text-xs">{t.unread_count}</Badge>
                                     )}
                                 </div>
                                 <div className="text-xs text-muted-foreground truncate">
@@ -143,7 +143,7 @@ export default function SupportTab({ token }) {
                                                 <div className={`max-w-[75%] rounded-2xl px-4 py-2 ${isAdmin ? 'bg-primary text-primary-foreground rounded-tr-sm' : 'bg-muted rounded-tl-sm'}`}>
                                                     <p className="text-sm whitespace-pre-wrap">{m.message}</p>
                                                 </div>
-                                                <span className="text-[10px] text-muted-foreground mt-1 mx-1">
+                                                <span className="text-xs text-muted-foreground mt-1 mx-1">
                                                     {new Date(m.created_at).toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>

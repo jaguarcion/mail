@@ -262,7 +262,7 @@ export default function ClientsTab({ token, clients, onFetchClients }) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="text-xs space-y-1">
-                                                {c.subscription_starts_at && <div><span className="font-bold">С:</span> {formatDate(c.subscription_starts_at)}</div>}
+                                                {c.subscription_starts_at && <div className="font-bold">С: {formatDate(c.subscription_starts_at)}</div>}
                                                 <div className="font-medium">До: {c.subscription_ends_at ? formatDate(c.subscription_ends_at) : 'Бессрочно'}</div>
                                             </div>
                                         </TableCell>
@@ -270,7 +270,7 @@ export default function ClientsTab({ token, clients, onFetchClients }) {
                                             {(() => {
                                                 if (!c.subscription_ends_at) return <span className="text-xs text-muted-foreground">Бессрочно</span>;
                                                 const diff = Math.ceil((new Date(c.subscription_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-                                                return <Badge variant="outline" className={`text-[10px] ${diff <= 3 ? "bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20" : diff <= 15 ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 hover:bg-yellow-500/20" : "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20"}`}>{diff < 0 ? 'Закончилась' : `${diff} дн.`}</Badge>;
+                                                return <Badge variant="outline" className={`text-xs ${diff <= 3 ? "bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20" : diff <= 15 ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 hover:bg-yellow-500/20" : "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20"}`}>{diff < 0 ? 'Закончилась' : `${diff} дн.`}</Badge>;
                                             })()}
                                         </TableCell>
                                         <TableCell>
@@ -287,7 +287,7 @@ export default function ClientsTab({ token, clients, onFetchClients }) {
                                                             Отвязать
                                                         </Button>
                                                     </div>
-                                                    <Badge variant={c.adobe_account_status === 'active' ? 'outline' : 'destructive'} className={c.adobe_account_status === 'active' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20 text-[10px]' : 'text-[10px]'}>
+                                                    <Badge variant={c.adobe_account_status === 'active' ? 'outline' : 'destructive'} className={c.adobe_account_status === 'active' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20 text-xs' : 'text-xs'}>
                                                         {c.adobe_account_status === 'active' ? 'Активный' : c.adobe_account_status === 'banned' ? 'Забанен' : c.adobe_account_status}
                                                     </Badge>
                                                 </div>
@@ -329,9 +329,9 @@ export default function ClientsTab({ token, clients, onFetchClients }) {
                                 <label className="text-sm font-medium">Подписка до</label>
                                 <Input type="date" value={editForm.subscription_ends_at} onChange={e => setEditForm({...editForm, subscription_ends_at: e.target.value})} />
                                 <div className="flex gap-2 pt-1">
-                                    <Button type="button" variant="outline" size="sm" className="h-6 text-[10px]" onClick={() => addDaysToSubscription(1)}>+1 день</Button>
-                                    <Button type="button" variant="outline" size="sm" className="h-6 text-[10px]" onClick={() => addDaysToSubscription(2)}>+2 дня</Button>
-                                    <Button type="button" variant="outline" size="sm" className="h-6 text-[10px]" onClick={() => addDaysToSubscription(3)}>+3 дня</Button>
+                                    <Button type="button" variant="outline" size="sm" className="h-6 text-xs" onClick={() => addDaysToSubscription(1)}>+1 день</Button>
+                                    <Button type="button" variant="outline" size="sm" className="h-6 text-xs" onClick={() => addDaysToSubscription(2)}>+2 дня</Button>
+                                    <Button type="button" variant="outline" size="sm" className="h-6 text-xs" onClick={() => addDaysToSubscription(3)}>+3 дня</Button>
                                 </div>
                             </div>
                             <Button type="submit" disabled={loading} className="w-full">
