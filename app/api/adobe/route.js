@@ -54,10 +54,15 @@ export async function PATCH(request) {
     }
 
     if (action === 'assign') {
+      const db = require('@/lib/db');
+      const account = db.getAdobeAccountById(id);
+      
       updateAdobeAccountClient(id, client_id === -1 ? -1 : (client_id || null));
-      // Optionally update client if a real client is assigned, but we are moving away from this.
+      
       if (client_id && client_id !== -1) {
         updateClientAdobeAccount(client_id, id);
+      } else if (!client_id && account && account.assigned_client_id) {
+        updateClientAdobeAccount(account.assigned_client_id, null);
       }
       return NextResponse.json({ success: true });
     }
