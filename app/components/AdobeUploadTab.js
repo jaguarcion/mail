@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -46,14 +47,14 @@ export default function AdobeUploadTab({ token }) {
             });
             const data = await res.json();
             if (data.success) {
-                alert(`Добавлено: ${data.added}, Ошибок: ${data.errors}`);
+                toast.success(`Добавлено: ${data.added}, Ошибок: ${data.errors}`);
                 setUploadText("");
                 fetchUploads();
             } else {
-                alert(data.error);
+                toast.error(data.error || "Ошибка при загрузке");
             }
         } catch (e) {
-            alert("Error uploading accounts");
+            toast.error("Ошибка при загрузке аккаунтов");
         }
         setLoading(false);
     };
@@ -150,7 +151,7 @@ export default function AdobeUploadTab({ token }) {
             </Card>
 
             <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-                <DialogContent className="max-w-[95vw] max-h-[90vh] flex flex-col">
+                <DialogContent className="w-[95vw] sm:max-w-[90vw] md:max-w-[1200px] max-h-[90vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle>Аккаунты из загрузки #{selectedUploadId}</DialogTitle>
                     </DialogHeader>
@@ -196,7 +197,7 @@ export default function AdobeUploadTab({ token }) {
                                                     className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                                                     onClick={() => {
                                                         navigator.clipboard.writeText(`${acc.email} | ${acc.password} | ${acc.adobe_password} | ${acc.refresh_token} | ${acc.device_id}`);
-                                                        alert("Скопировано!");
+                                                        toast.success("Данные скопированы в буфер обмена");
                                                     }}
                                                 >
                                                     <Copy className="w-3 h-3 mr-1" /> Всё

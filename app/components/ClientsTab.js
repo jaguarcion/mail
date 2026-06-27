@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,13 +23,14 @@ export default function ClientsTab({ token, clients, onFetchClients }) {
             });
             const data = await res.json();
             if (data.success) {
+                toast.success("Клиент успешно создан!");
                 setForm({ email: '', telegram: '', subscription_ends_at: '' });
                 onFetchClients();
             } else {
-                alert(data.error);
+                toast.error(data.error || "Ошибка при создании");
             }
         } catch (e) {
-            alert("Error");
+            toast.error(e.message || "Произошла ошибка");
         }
         setLoading(false);
     };

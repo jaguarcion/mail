@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from 'react';
+import { toast } from 'sonner';
 import Head from 'next/head';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -52,10 +53,10 @@ export default function ClientAdobePage({ params }) {
             if (json.success) {
                 window.location.href = `/client/adobe/${json.new_id}`;
             } else {
-                alert(json.error || 'Ошибка при замене аккаунта');
+                toast.error(json.error || 'Ошибка при замене аккаунта');
             }
         } catch (e) {
-            alert(e.message);
+            toast.error(e.message);
         } finally {
             setReplacing(false);
         }
@@ -63,6 +64,7 @@ export default function ClientAdobePage({ params }) {
 
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text);
+        toast.success("Данные скопированы в буфер обмена");
     };
 
     const copyAll = () => {
