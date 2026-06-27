@@ -80,7 +80,7 @@ export default function AdobeListTab({ token, clients, onFetchClients }) {
                                     <TableRow key={acc.id}>
                                         <TableCell>
                                             <div className="font-medium">{acc.email}</div>
-                                            <a href={`/client/adobe/${acc.id}`} target="_blank" className="text-xs text-primary flex items-center gap-1 hover:underline mt-1">
+                                            <a href={`/client/adobe/${acc.access_token}`} target="_blank" className="text-xs text-primary flex items-center gap-1 hover:underline mt-1">
                                                 Ссылка <ExternalLink className="w-3 h-3" />
                                             </a>
                                         </TableCell>

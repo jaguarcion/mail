@@ -11,6 +11,8 @@ export async function GET(request) {
     const uploads = getAdobeUploads();
     return NextResponse.json({ success: true, data: uploads });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[Adobe Uploads]', error);
+    // [SECURITY] H-02: Don't leak error details
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

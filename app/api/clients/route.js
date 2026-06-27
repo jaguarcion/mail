@@ -11,7 +11,9 @@ export async function GET(request) {
     const clients = getAllClients();
     return NextResponse.json({ success: true, data: clients });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[Clients GET]', error);
+    // [SECURITY] H-02: Don't leak error details
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -24,14 +26,25 @@ export async function POST(request) {
     const body = await request.json();
     const { email, telegram, subscription_ends_at } = body;
 
-    if (!email) {
+    // [SECURITY] M-01: Validate email format
+    if (!email || typeof email !== 'string') {
       return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 });
     }
 
-    const result = insertClient(email, telegram || null, subscription_ends_at || null);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ success: false, error: 'Invalid email format' }, { status: 400 });
+    }
+
+    // [SECURITY] M-01: Sanitize optional fields
+    const safeTelegram = telegram ? String(telegram).slice(0, 100) : null;
+    const safeSubDate = subscription_ends_at ? String(subscription_ends_at).slice(0, 10) : null;
+
+    const result = insertClient(email, safeTelegram, safeSubDate);
     
     return NextResponse.json({ success: true, id: result.lastInsertRowid });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[Clients POST]', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

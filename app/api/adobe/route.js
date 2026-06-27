@@ -11,7 +11,9 @@ export async function GET(request) {
     const accounts = getAllAdobeAccounts();
     return NextResponse.json({ success: true, data: accounts });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[Adobe GET]', error);
+    // [SECURITY] H-02: Don't leak error details
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -23,15 +25,17 @@ export async function DELETE(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 
-  if (!id) {
-    return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
+  // [SECURITY] M-01: Validate ID is a number
+  if (!id || isNaN(parseInt(id))) {
+    return NextResponse.json({ success: false, error: 'Valid numeric ID is required' }, { status: 400 });
   }
 
   try {
-    deleteAdobeAccount(id);
+    deleteAdobeAccount(parseInt(id));
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[Adobe DELETE]', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -44,6 +48,11 @@ export async function PATCH(request) {
     const body = await request.json();
     const { id, client_id, action } = body;
 
+    // [SECURITY] M-01: Validate input types
+    if (!id || !action || typeof action !== 'string') {
+      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+    }
+
     if (action === 'assign') {
       updateAdobeAccountClient(id, client_id);
       if (client_id) {
@@ -54,6 +63,7 @@ export async function PATCH(request) {
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[Adobe PATCH]', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

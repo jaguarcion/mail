@@ -1,15 +1,22 @@
 import { NextResponse } from 'next/server';
-import { getAdobeAccountById, getActiveUnassignedAdobeAccount, updateAdobeAccountClient, updateClientAdobeAccount } from '@/lib/db';
+import { getAdobeAccountByAccessToken, getActiveUnassignedAdobeAccount, updateAdobeAccountClient, updateClientAdobeAccount } from '@/lib/db';
 
+// [SECURITY] C-01+C-02: Use access_token for lookup instead of sequential ID.
 export async function POST(request, { params }) {
-  const { id } = await params;
+  const { id: accessToken } = await params;
   
-  if (!id) {
-    return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 });
+  if (!accessToken || typeof accessToken !== 'string') {
+    return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 });
+  }
+
+  // [SECURITY] C-02: Validate UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(accessToken)) {
+    return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
   }
 
   try {
-    const oldAccount = getAdobeAccountById(id);
+    const oldAccount = getAdobeAccountByAccessToken(accessToken);
     if (!oldAccount) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     
     const clientId = oldAccount.assigned_client_id;
@@ -29,8 +36,11 @@ export async function POST(request, { params }) {
     // Unassign old account
     updateAdobeAccountClient(oldAccount.id, null);
     
-    return NextResponse.json({ success: true, new_id: newAccount.id });
+    // [SECURITY] Return the new access_token, not numeric ID
+    return NextResponse.json({ success: true, new_id: newAccount.access_token });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[ClientAdobe Replace] Error:', error);
+    // [SECURITY] H-02: Don't leak error details
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

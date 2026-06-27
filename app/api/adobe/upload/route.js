@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
 import { insertAdobeAccount, insertAdobeUpload } from '@/lib/db';
 
+// [SECURITY] M-04: Limit upload text size
+const MAX_UPLOAD_SIZE = 500_000; // ~500KB
+
 export async function POST(request) {
   if (!isAuthenticated(request)) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -13,6 +16,11 @@ export async function POST(request) {
 
     if (!text) {
       return NextResponse.json({ success: false, error: 'Text is required' }, { status: 400 });
+    }
+
+    // [SECURITY] M-04: Prevent DoS via huge uploads
+    if (typeof text !== 'string' || text.length > MAX_UPLOAD_SIZE) {
+      return NextResponse.json({ success: false, error: 'Upload text too large (max 500KB)' }, { status: 400 });
     }
 
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -40,6 +48,8 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, added, errors, upload_id: uploadId });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('[Adobe Upload]', error);
+    // [SECURITY] H-02: Don't leak error details
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

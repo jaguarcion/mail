@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { insertEmail } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
+import crypto from "crypto";
 
 const MIGADU_API_URL = "https://api.migadu.com/v1/domains";
 
@@ -21,9 +22,15 @@ function generateRandomString(length = 8) {
   return result;
 }
 
-// Utility to generate password (currently hardcoded as requested)
-function generatePassword() {
-  return "Pochta9632147.";
+// [SECURITY] C-03: Generate cryptographically random password instead of hardcoded
+function generatePassword(length = 16) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
+  const bytes = crypto.randomBytes(length);
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += chars[bytes[i] % chars.length];
+  }
+  return password;
 }
 
 export async function POST(request) {
@@ -37,9 +44,18 @@ export async function POST(request) {
     const reqDomain = body.domain;
     const amount = parseInt(count);
 
+    // [SECURITY] M-01: Input validation
     if (isNaN(amount) || amount <= 0 || amount > 100) {
       return NextResponse.json(
         { error: "Invalid count. Must be between 1 and 100." },
+        { status: 400 }
+      );
+    }
+
+    // [SECURITY] M-01: Validate domain format
+    if (reqDomain && !/^[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(reqDomain)) {
+      return NextResponse.json(
+        { error: "Invalid domain format." },
         { status: 400 }
       );
     }
@@ -51,7 +67,7 @@ export async function POST(request) {
     if (!email || !apiKey || !domain) {
       console.error("Missing Migadu credentials in environment variables.");
       return NextResponse.json(
-        { error: "Server configuration error. Missing credentials." },
+        { error: "Server configuration error." },
         { status: 500 }
       );
     }
@@ -62,7 +78,7 @@ export async function POST(request) {
 
     // Process sequentially to avoid rate limiting
     for (let i = 0; i < amount; i++) {
-      const localPart = generateRandomString(8); // Generates readable strings like 'bapetozo123'
+      const localPart = generateRandomString(8);
       const password = generatePassword(16);
       const mailboxName = `Gen ${localPart}`;
       const fullEmail = `${localPart}@${domain}`;
@@ -116,6 +132,7 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("API error:", error);
+    // [SECURITY] H-02: Don't leak error details
     return NextResponse.json(
       { error: "An unexpected error occurred." },
       { status: 500 }
