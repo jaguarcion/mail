@@ -149,12 +149,14 @@ bot.on('message', async (msg) => {
             return bot.sendMessage(chatId, '❌ Аккаунт не найден. Обратитесь в поддержку.');
         }
 
+        const baseUrl = process.env.APP_URL || 'https://keysoft.store';
         const msgText = `👤 **Данные аккаунта:**
         
 📧 Email: ${acc.email}
 🔑 Пароль: ${acc.password || 'Нет'}
 🔐 Пароль Adobe: ${acc.adobe_password || 'Нет'}
-📊 Статус: ${acc.status === 'active' ? '🟢 Активен' : '🔴 Заблокирован'}`;
+📊 Статус: ${acc.status === 'active' ? '🟢 Активен' : '🔴 Заблокирован'}
+🌐 Ссылка на доступ: ${baseUrl}/client/adobe/${acc.access_token}`;
         return bot.sendMessage(chatId, msgText, { parse_mode: 'Markdown' });
     }
 
@@ -191,9 +193,22 @@ bot.on('message', async (msg) => {
 
             let responseText = '📩 **Последние важные письма:**\n\n';
             for (const m of codes) {
-                const codeMatch = m.subject?.match(/\b\d{6}\b/);
-                const code = codeMatch ? codeMatch[0] : (m.code || 'Код не найден (возможно просто уведомление)');
-                responseText += `От: ${m.from?.address || m.from || 'Adobe'}\nТема: ${m.subject}\nКод: **${code}**\nВремя: ${m.date}\n---\n`;
+                let code = 'Код не найден (возможно просто уведомление)';
+                if (m.code) {
+                    code = m.code;
+                } else {
+                    const subjectMatch = m.subject?.match(/\b\d{6}\b/);
+                    if (subjectMatch) {
+                        code = subjectMatch[0];
+                    } else {
+                        const htmlMatch = m.message?.match(/>(\d{6})</);
+                        if (htmlMatch) code = htmlMatch[1];
+                    }
+                }
+                
+                const mskDate = m.date ? new Date(m.date).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : 'Неизвестно';
+                
+                responseText += `От: ${m.from?.address || m.from || 'Adobe'}\nТема: ${m.subject}\nКод: **${code}**\nВремя: ${mskDate} МСК\n---\n`;
             }
             return bot.sendMessage(chatId, responseText, { parse_mode: 'Markdown' });
         } catch (e) {
