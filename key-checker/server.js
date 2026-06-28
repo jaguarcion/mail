@@ -6,7 +6,7 @@ const adobeClient = require('./src/adobeClient');
 const configManager = require('./src/configManager');
 
 const app = express();
-const PORT = 3005;
+const PORT = 3015;
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));

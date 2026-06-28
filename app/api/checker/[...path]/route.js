@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
 
-const CHECKER_URL = 'http://127.0.0.1:3005';
+const CHECKER_URL = 'http://127.0.0.1:3015';
 
 export async function GET(request, { params }) {
   if (!isAuthenticated(request)) {
