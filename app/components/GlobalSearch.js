@@ -9,6 +9,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  Command,
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 
@@ -75,49 +76,51 @@ export default function GlobalSearch({ token, onSelectResult }) {
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-            placeholder="Введите email, telegram или имя..." 
-            value={query}
-            onValueChange={setQuery}
-        />
-        <CommandList>
-          {loading && <div className="p-4 flex justify-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>}
-          {!loading && results.clients.length === 0 && results.accounts.length === 0 && (
-            <CommandEmpty>Ничего не найдено.</CommandEmpty>
-          )}
-          
-          {!loading && results.clients.length > 0 && (
-            <CommandGroup heading="Клиенты">
-              {results.clients.map((client) => (
-                <CommandItem key={`client-${client.id}`} onSelect={() => handleSelect('client', client)}>
-                  <User className="mr-2 h-4 w-4 text-blue-500" />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{client.email}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {[client.telegram_first_name, client.telegram_last_name].filter(Boolean).join(" ")} {client.telegram ? `(@${client.telegram})` : ""}
-                    </span>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
+        <Command>
+          <CommandInput 
+              placeholder="Введите email, telegram или имя..." 
+              value={query}
+              onValueChange={setQuery}
+          />
+          <CommandList>
+            {loading && <div className="p-4 flex justify-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>}
+            {!loading && results.clients.length === 0 && results.accounts.length === 0 && (
+              <CommandEmpty>Ничего не найдено.</CommandEmpty>
+            )}
+            
+            {!loading && results.clients.length > 0 && (
+              <CommandGroup heading="Клиенты">
+                {results.clients.map((client) => (
+                  <CommandItem key={`client-${client.id}`} onSelect={() => handleSelect('client', client)}>
+                    <User className="mr-2 h-4 w-4 text-blue-500" />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{client.email}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {[client.telegram_first_name, client.telegram_last_name].filter(Boolean).join(" ")} {client.telegram ? `(@${client.telegram})` : ""}
+                      </span>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
 
-          {!loading && results.accounts.length > 0 && (
-            <CommandGroup heading="Аккаунты Adobe">
-              {results.accounts.map((account) => (
-                <CommandItem key={`acc-${account.id}`} onSelect={() => handleSelect('account', account)}>
-                  <Monitor className="mr-2 h-4 w-4 text-purple-500" />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{account.email}</span>
-                    <span className="text-xs text-muted-foreground">
-                      Статус: {account.status === 'active' ? 'Активен' : 'Забанен'}
-                    </span>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-        </CommandList>
+            {!loading && results.accounts.length > 0 && (
+              <CommandGroup heading="Аккаунты Adobe">
+                {results.accounts.map((account) => (
+                  <CommandItem key={`acc-${account.id}`} onSelect={() => handleSelect('account', account)}>
+                    <Monitor className="mr-2 h-4 w-4 text-purple-500" />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{account.email}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Статус: {account.status === 'active' ? 'Активен' : 'Забанен'}
+                      </span>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
       </CommandDialog>
     </>
   );
