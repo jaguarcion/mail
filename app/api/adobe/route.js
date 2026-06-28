@@ -61,6 +61,32 @@ export async function PATCH(request) {
       
       if (client_id && client_id !== -1) {
         updateClientAdobeAccount(client_id, id);
+        
+        // Notify client via Telegram
+        try {
+            const client = db.getClientById(client_id);
+            if (client && client.telegram_chat_id) {
+                const token = process.env.TELEGRAM_BOT_TOKEN;
+                if (token && account) {
+                    const message = `✅ *Вам назначен новый аккаунт Adobe!*\n\n` + 
+                                  `📧 Email: \`${account.email}\`\n\n` +
+                                  `Откройте меню бота или отправьте команду /adobe, чтобы получить доступ к аккаунту и кодам подтверждения.`;
+                    
+                    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: client.telegram_chat_id,
+                            text: message,
+                            parse_mode: 'Markdown'
+                        })
+                    }).catch(err => console.error("Failed to notify client:", err));
+                }
+            }
+        } catch (e) {
+            console.error("Error notifying client about assignment:", e);
+        }
+
       } else if (!client_id && account && account.assigned_client_id) {
         updateClientAdobeAccount(account.assigned_client_id, null);
       }
