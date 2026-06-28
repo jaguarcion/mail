@@ -22,7 +22,7 @@ export function CheckerWorkspace() {
   const lineNumbers = Array.from({ length: lineCount || 1 }, (_, i) => i + 1);
 
   return (
-    <Card className="h-[400px] bg-white/70 backdrop-blur-xl border-slate-200 hover:shadow-lg transition-all duration-300">
+    <Card className="h-full min-h-[400px] bg-white/70 backdrop-blur-xl border-slate-200 hover:shadow-lg transition-all duration-300">
       <CardContent className="p-4 flex flex-col h-full gap-4">
         <div className="flex justify-between items-end">
           <div className="text-xs font-medium text-slate-500">Список ключей</div>

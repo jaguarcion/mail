@@ -36,13 +36,15 @@ export async function POST(request, { params }) {
   const fullTargetUrl = `${CHECKER_URL}${targetPath}${queryString ? '?' + queryString : ''}`;
 
   try {
-    const body = await request.json();
+    const bodyText = await request.text();
+    const body = bodyText ? JSON.parse(bodyText) : undefined;
+    
     const res = await fetch(fullTargetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json();
     return NextResponse.json(data);
