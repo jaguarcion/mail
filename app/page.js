@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import AdobeListTab from "./components/AdobeListTab";
 import AdobeUploadTab from "./components/AdobeUploadTab";
 import ClientsTab from "./components/ClientsTab";
+import DashboardTab from "./components/DashboardTab";
+import GlobalSearch from "./components/GlobalSearch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,12 +13,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Download, Trash2, Mail, Users, Monitor, Zap, History, Menu } from "lucide-react";
+import { LogOut, Download, Trash2, Mail, Users, Monitor, Zap, History, Menu, LayoutDashboard } from "lucide-react";
 
 export default function Home() {
   const [token, setToken] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState("adobe-list");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [count, setCount] = useState(1);
@@ -261,6 +263,7 @@ export default function Home() {
   }
 
   const navItems = [
+    { id: 'dashboard', label: 'Дашборд', icon: LayoutDashboard },
     { 
       id: 'adobe-group', 
       label: 'Adobe', 
@@ -412,19 +415,37 @@ export default function Home() {
           <div className="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* Header */}
-          <div className="flex flex-col space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {activeTab === 'adobe-list' && 'Список аккаунтов Adobe'}
-              {activeTab === 'adobe-upload' && 'Загрузка аккаунтов Adobe'}
-              {navItems.find(n => n.id === activeTab)?.label}
-            </h1>
-            <p className="text-muted-foreground">
-              {activeTab === 'adobe-list' && 'Управление пулом аккаунтов Adobe и проверка статусов'}
-              {activeTab === 'adobe-upload' && 'Массовая загрузка аккаунтов и история загрузок'}
-              {activeTab === 'clients' && 'Управление клиентской базой и привязками'}
-              {activeTab === 'generator' && 'Массовая генерация почтовых ящиков через Migadu'}
-              {activeTab === 'history' && 'Управление базой данных сгенерированных почт'}
-            </p>
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div className="flex flex-col space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight">
+                {activeTab === 'dashboard' && 'Дашборд'}
+                {activeTab === 'adobe-list' && 'Список аккаунтов Adobe'}
+                {activeTab === 'adobe-upload' && 'Загрузка аккаунтов Adobe'}
+                {navItems.find(n => n.id === activeTab)?.label}
+              </h1>
+              <p className="text-muted-foreground">
+                {activeTab === 'dashboard' && 'Статистика и аналитика вашей платформы'}
+                {activeTab === 'adobe-list' && 'Управление пулом аккаунтов Adobe и проверка статусов'}
+                {activeTab === 'adobe-upload' && 'Массовая загрузка аккаунтов и история загрузок'}
+                {activeTab === 'clients' && 'Управление клиентской базой и привязками'}
+                {activeTab === 'generator' && 'Массовая генерация почтовых ящиков через Migadu'}
+                {activeTab === 'history' && 'Управление базой данных сгенерированных почт'}
+              </p>
+            </div>
+            
+            <div className="shrink-0 w-full md:w-auto">
+              <GlobalSearch 
+                token={token} 
+                onSelectResult={(type, item) => {
+                  if (type === 'client') {
+                    setActiveTab('clients');
+                    // We could also pass a search term to ClientsTab if we stored it in a global state, but switching tabs is fine for now
+                  } else if (type === 'account') {
+                    setActiveTab('adobe-list');
+                  }
+                }} 
+              />
+            </div>
           </div>
 
           {/* Render Active Tab */}
@@ -571,6 +592,10 @@ export default function Home() {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {activeTab === 'dashboard' && (
+            <DashboardTab token={token} />
           )}
 
           {activeTab === 'adobe-list' && (
