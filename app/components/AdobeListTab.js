@@ -228,9 +228,9 @@ export default function AdobeListTab({ token, clients, onFetchClients }) {
                                                         {[acc.client_first_name, acc.client_last_name].filter(Boolean).join(" ") || "Без имени"}
                                                     </span>
                                                     {acc.client_telegram ? (
-                                                        <span className="text-xs text-blue-500">
+                                                        <a href={`https://t.me/${acc.client_telegram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
                                                             {acc.client_telegram.startsWith('@') ? acc.client_telegram : `@${acc.client_telegram}`}
-                                                        </span>
+                                                        </a>
                                                     ) : acc.client_email ? (
                                                         <span className="text-xs text-slate-500">{acc.client_email}</span>
                                                     ) : null}
