@@ -46,6 +46,15 @@ export default function ClientPage({ initialTab }) {
   }, [initialTab]);
 
   useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.replace('/', '') || 'dashboard';
+      setActiveTab(path);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
     const savedToken = localStorage.getItem("zenmail_token");
     if (savedToken) {
       setToken(savedToken);
@@ -70,7 +79,7 @@ export default function ClientPage({ initialTab }) {
 
   const changeTab = (tabId) => {
     setActiveTab(tabId);
-    router.push(`/${tabId}`);
+    window.history.pushState(null, '', `/${tabId}`);
   };
 
   const handleLogin = async (e) => {
