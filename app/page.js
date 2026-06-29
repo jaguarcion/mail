@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Download, Trash2, Mail, Users, Monitor, Zap, History, Menu, LayoutDashboard, ScrollText } from "lucide-react";
+import { LogOut, Download, Trash2, Mail, Users, Monitor, Zap, History, Menu, LayoutDashboard, ScrollText, Key } from "lucide-react";
 
 export default function Home() {
   const [token, setToken] = useState("");
@@ -421,12 +421,19 @@ export default function Home() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div className="flex flex-col space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                 {activeTab === 'adobe-list' && 'Список аккаунтов Adobe'}
                 {activeTab === 'adobe-upload' && 'Загрузка аккаунтов Adobe'}
                 {activeTab === 'audit-logs' && 'Журнал логов'}
-                {activeTab === 'keys-checker' && 'Чекер ключей'}
-                {navItems.find(n => n.id === activeTab)?.label}
+                {activeTab === 'keys-checker' && (
+                  <>
+                    <div className="bg-[#e9f0ff] p-2.5 rounded-2xl text-[#1e4ed8] flex items-center justify-center">
+                      <Key className="w-6 h-6" />
+                    </div>
+                    <span>Чекер Adobe ключей</span>
+                  </>
+                )}
+                {activeTab !== 'adobe-list' && activeTab !== 'adobe-upload' && activeTab !== 'audit-logs' && activeTab !== 'keys-checker' && navItems.find(n => n.id === activeTab)?.label}
               </h1>
               <p className="text-muted-foreground">
                 {activeTab === 'dashboard' && 'Статистика и аналитика вашей платформы'}
