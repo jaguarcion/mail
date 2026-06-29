@@ -39,7 +39,7 @@ export function CheckerWorkspace() {
           </div>
           <textarea 
             ref={textareaRef}
-            placeholder="Вставьте ключи здесь...&#10;XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"
+            placeholder={"Вставьте ключи здесь...\nXXXX-XXXX-XXXX-XXXX-XXXX-XXXX"}
             className="flex-1 w-full p-3 text-xs font-mono resize-none focus:outline-none bg-transparent"
             style={{ lineHeight: '1.25rem', whiteSpace: 'pre' }}
             value={keys}
