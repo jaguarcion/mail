@@ -36,7 +36,9 @@ export async function GET(request, { params }) {
     if (result && result.messages && Array.isArray(result.messages)) {
         codes = result.messages.filter(msg => {
             const subj = (msg.subject || '').toLowerCase();
-            return subj.includes('verification code') || subj.includes('email address changed') || subj.includes('suspended') || subj.includes('fraudulent activity detected') || subj.includes('fraudulent behavior');
+            const from = (msg.from || '').toLowerCase();
+            // Match any email from Adobe or containing standard security keywords regardless of language
+            return from.includes('adobe.com') || subj.includes('verification') || subj.includes('код') || subj.includes('code') || subj.includes('suspended') || subj.includes('fraudulent');
         });
         codes = codes.slice(0, 5); // top 5
     }
