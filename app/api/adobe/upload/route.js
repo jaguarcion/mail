@@ -41,6 +41,15 @@ export async function POST(request) {
           console.error('Insert error:', err.message);
           errors++;
         }
+      } else if (parts.length === 4) {
+        const [email, adobe_password, refresh_token, device_id] = parts;
+        try {
+          insertAdobeAccount(email, "", adobe_password, refresh_token, device_id, uploadId);
+          added++;
+        } catch (err) {
+          console.error('Insert error:', err.message);
+          errors++;
+        }
       } else {
         errors++;
       }
