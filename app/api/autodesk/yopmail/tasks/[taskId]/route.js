@@ -8,7 +8,7 @@ export async function PUT(request, { params }) {
     }
 
     try {
-        const taskId = params.taskId;
+        const { taskId } = await params;
         const body = await request.json();
         const { success, error, status, items } = body;
 
@@ -40,7 +40,7 @@ export async function DELETE(request, { params }) {
     }
 
     try {
-        const taskId = params.taskId;
+        const { taskId } = await params;
         
         
         const stmt = db.prepare(`DELETE FROM yopmail_tasks WHERE id = ?`);
