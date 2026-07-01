@@ -33,22 +33,35 @@ export default function AutodeskInviterTab({ token }) {
     const logsEndRef = useRef(null);
 
     useEffect(() => {
-        const savedConfig = localStorage.getItem('autodesk_config');
-        if (savedConfig) {
+        const fetchConfig = async () => {
             try {
-                setConfig(JSON.parse(savedConfig));
-            } catch (e) {
-                console.error("Failed to parse saved config", e);
+                const res = await fetch('/api/autodesk/config', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.status === 'success' && data.config) {
+                    setConfig(data.config);
+                }
+            } catch (err) {
+                console.error("Failed to load config", err);
             }
-        }
-        setIsConfigLoaded(true);
-    }, []);
+            setIsConfigLoaded(true);
+        };
+        fetchConfig();
+    }, [token]);
 
     useEffect(() => {
         if (isConfigLoaded) {
-            localStorage.setItem('autodesk_config', JSON.stringify(config));
+            fetch('/api/autodesk/config', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(config)
+            }).catch(() => {});
         }
-    }, [config, isConfigLoaded]);
+    }, [config, isConfigLoaded, token]);
 
     const handleConfigChange = (e) => {
         setConfig({ ...config, [e.target.name]: e.target.value });
