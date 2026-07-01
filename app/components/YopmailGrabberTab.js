@@ -12,21 +12,24 @@ export default function YopmailGrabberTab({ token }) {
     const [isLoaded, setIsLoaded] = useState(false);
     const [expandedTasks, setExpandedTasks] = useState({});
 
-    // Load tasks from localStorage on mount
+    // Load tasks from API on mount
     useEffect(() => {
-        const saved = localStorage.getItem('yopmail_tasks');
-        if (saved) {
-            try { setTasks(JSON.parse(saved)); } catch (e) {}
-        }
-        setIsLoaded(true);
-    }, []);
-
-    // Save tasks to localStorage when changed
-    useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem('yopmail_tasks', JSON.stringify(tasks));
-        }
-    }, [tasks, isLoaded]);
+        const fetchTasks = async () => {
+            try {
+                const res = await fetch('/api/autodesk/yopmail/tasks', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    setTasks(data.tasks);
+                }
+            } catch (err) {
+                console.error("Failed to load tasks", err);
+            }
+            setIsLoaded(true);
+        };
+        fetchTasks();
+    }, [token]);
 
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
@@ -67,6 +70,13 @@ export default function YopmailGrabberTab({ token }) {
         setTasks(prev => [newTask, ...prev]);
         setExpandedTasks(prev => ({ ...prev, [taskId]: true })); // Expand by default
         
+        // Save initial task to DB
+        fetch('/api/autodesk/yopmail/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(newTask)
+        }).catch(() => {});
+
         processTask(taskId, initialItems, token);
     };
 
@@ -84,13 +94,22 @@ export default function YopmailGrabberTab({ token }) {
                     const successCount = newItems.filter(i => i.status === 'success').length;
                     const errorCount = newItems.filter(i => i.status === 'error').length;
                     const pendingCount = newItems.filter(i => i.status === 'pending' || i.status === 'processing').length;
-                    return {
+                    const updatedTask = {
                         ...t,
                         items: newItems,
                         success: successCount,
                         error: errorCount,
                         status: pendingCount === 0 ? 'completed' : 'processing'
                     };
+                    
+                    // Sync progress to DB
+                    fetch(`/api/autodesk/yopmail/tasks/${taskId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(updatedTask)
+                    }).catch(() => {});
+
+                    return updatedTask;
                 }
                 return t;
             }));
@@ -156,8 +175,17 @@ export default function YopmailGrabberTab({ token }) {
         toast.success(`Скопировано ${aliases.length} почт`);
     };
 
-    const handleDeleteTask = (taskId) => {
+    const handleDeleteTask = async (taskId) => {
         setTasks(prev => prev.filter(t => t.id !== taskId));
+        try {
+            await fetch(`/api/autodesk/yopmail/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            toast.success("Задача удалена");
+        } catch (err) {
+            toast.error("Ошибка удаления");
+        }
     };
 
     return (
