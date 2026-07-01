@@ -5,8 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Play, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
-import Papa from "papaparse";
+import { Upload, Play, CheckCircle2, XCircle, RotateCcw, ListPlus } from "lucide-react";
+
+const FIRST_NAMES = ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Charles", "Joseph", "Thomas", "Mary", "Patricia", "Jennifer", "Linda", "Elizabeth", "Barbara", "Susan", "Jessica", "Sarah", "Karen", "Alex", "David", "Max", "Leo"];
+const LAST_NAMES = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Walker", "Hall"];
+
+function generateRandomName() {
+    const firstName = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+    const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+    return { firstName, lastName };
+}
 
 export default function AutodeskInviterTab({ token }) {
     const [config, setConfig] = useState({
@@ -17,45 +25,32 @@ export default function AutodeskInviterTab({ token }) {
     });
     
     const [users, setUsers] = useState([]);
+    const [emailsInput, setEmailsInput] = useState("");
     const [logs, setLogs] = useState([]);
     const [isInviting, setIsInviting] = useState(false);
     const [stats, setStats] = useState({ success: 0, error: 0 });
-    const fileInputRef = useRef(null);
     const logsEndRef = useRef(null);
 
     const handleConfigChange = (e) => {
         setConfig({ ...config, [e.target.name]: e.target.value });
     };
 
-    const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    const handleLoadEmails = () => {
+        const lines = emailsInput.split('\n').map(l => l.trim()).filter(l => l);
+        if (lines.length === 0) {
+            toast.error("Введите хотя бы один email");
+            return;
+        }
 
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                const parsedUsers = results.data.map(row => {
-                    // Обработка различных вариантов названий колонок
-                    const email = row['Email'] || row['email'] || row['EmailId'] || row['emailId'] || Object.values(row)[0];
-                    const firstName = row['FirstName'] || row['firstName'] || row['First Name'] || '';
-                    const lastName = row['LastName'] || row['lastName'] || row['Last Name'] || '';
-                    
-                    return { email: email?.trim(), firstName: firstName?.trim(), lastName: lastName?.trim(), status: 'pending' };
-                }).filter(u => u.email);
-
-                setUsers(parsedUsers);
-                setStats({ success: 0, error: 0 });
-                setLogs([{ type: 'info', message: `Успешно загружено ${parsedUsers.length} пользователей из ${file.name}` }]);
-                toast.success(`Загружено ${parsedUsers.length} пользователей`);
-            },
-            error: function(err) {
-                toast.error("Ошибка чтения CSV: " + err.message);
-            }
+        const parsedUsers = lines.map(email => {
+            const { firstName, lastName } = generateRandomName();
+            return { email, firstName, lastName, status: 'pending' };
         });
-        
-        // Reset file input
-        e.target.value = '';
+
+        setUsers(parsedUsers);
+        setStats({ success: 0, error: 0 });
+        setLogs([{ type: 'info', message: `Успешно загружено ${parsedUsers.length} почт.` }]);
+        toast.success(`К загрузке готово: ${parsedUsers.length} аккаунтов`);
     };
 
     const addLog = (type, message) => {
@@ -187,35 +182,32 @@ export default function AutodeskInviterTab({ token }) {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Список пользователей (CSV)</CardTitle>
-                        <CardDescription>Загрузите CSV файл (Колонки: Email, FirstName, LastName)</CardDescription>
+                        <CardTitle>Список почт</CardTitle>
+                        <CardDescription>Вставьте список email адресов (каждый с новой строки). Имена будут сгенерированы автоматически.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                            <Upload className="h-8 w-8 text-muted-foreground mb-4" />
-                            <h3 className="font-medium mb-1">Загрузите файл с базой</h3>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Поддерживается формат .csv
-                            </p>
-                            <input
-                                type="file"
-                                accept=".csv"
-                                className="hidden"
-                                ref={fileInputRef}
-                                onChange={handleFileUpload}
-                            />
-                            <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={isInviting}>
-                                Выбрать CSV файл
+                    <CardContent className="space-y-4">
+                        <Textarea 
+                            className="min-h-[160px] font-mono text-sm" 
+                            placeholder="alt.hk_cob85ha1@yopmail.com&#10;alt.bm-07m979d@yopmail.com"
+                            value={emailsInput}
+                            onChange={e => setEmailsInput(e.target.value)}
+                            disabled={isInviting}
+                        />
+
+                        <div className="flex items-center justify-between">
+                            <Button variant="secondary" onClick={handleLoadEmails} disabled={isInviting || !emailsInput.trim()}>
+                                <ListPlus className="h-4 w-4 mr-2" />
+                                Загрузить в очередь
                             </Button>
                             
                             {users.length > 0 && (
-                                <p className="mt-4 text-sm font-medium text-green-600">
-                                    К загрузке готово: {users.length} пользователей
+                                <p className="text-sm font-medium text-green-600">
+                                    В очереди: {users.length}
                                 </p>
                             )}
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 pt-2 border-t mt-4">
                             <Button 
                                 onClick={startInvites} 
                                 disabled={isInviting || users.length === 0}
